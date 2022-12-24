@@ -8,3 +8,4 @@
 3) 
 
 ## Ideas
+1) Handle all wordlist operations on array copies to prevent state mutation bugs
