@@ -44,6 +44,10 @@ export class Word {
     return this.#value.includes(letters);
   }
 
+  isSet(): boolean {
+    return Boolean(this.#value.length);
+  }
+
   hasGreenLetters(clueList: ClueList): boolean {
     return false;
   }
