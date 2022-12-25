@@ -1,9 +1,10 @@
 import fs from "fs";
+import { Word } from "./Word";
 
 class WordList {
   #file: string = "";
-  #list: string[] = [];
-  #listHistory: string[][] = [];
+  #list: Word[] = [];
+  #listHistory: Word[][] = [];
 
   constructor(path: fs.PathOrFileDescriptor) {
     console.clear();
@@ -30,10 +31,10 @@ class WordList {
   }
 
   private createWordList(separator: string = "\n"): void {
-    this.#list = this.#file.split(separator);
+    this.#list = this.#file.split(separator).map((word) => new Word(word));
   }
 
-  createNewWordList(newWordList: string[]): string[] {
+  createNewWordList(newWordList: Word[]): Word[] {
     this.#listHistory.push(this.#list.slice());
     this.#list = newWordList.slice() || this.#list.slice();
     return this.#list.slice();
@@ -43,7 +44,7 @@ class WordList {
     return this.#listHistory.length;
   }
 
-  findWordsWith(letters: string): string[] {
+  findWordsWith(letters: string): Word[] {
     return this.#list.filter((word) => word.includes(letters));
   }
 
@@ -51,7 +52,7 @@ class WordList {
     return this.findWordsWith(letters).length;
   }
 
-  findWordsWithout(letters: string): string[] {
+  findWordsWithout(letters: string): Word[] {
     return this.#list.filter((word) => !word.includes(letters));
   }
 
@@ -59,16 +60,16 @@ class WordList {
     return this.findWordsWithout(letters).length;
   }
 
-  findWordsWithLetterAtIndex(letter: string, index: number): string[] {
-    return this.#list.filter((word) => word[index] === letter);
+  findWordsWithLetterAtIndex(letter: string, index: number): Word[] {
+    return this.#list.filter((word) => word.getIndex(index) === letter);
   }
 
   findWordCountWithLetterAtIndex(letter: string, index: number): number {
     return this.findWordsWithLetterAtIndex(letter, index).length;
   }
 
-  joinWordLists(wordLists: string[][]): string[] {
-    let joined: string[] = [];
+  joinWordLists(wordLists: Word[][]): Word[] {
+    let joined: Word[] = [];
     return joined.concat(...wordLists);
   }
 
@@ -80,11 +81,11 @@ class WordList {
     this.createNewWordList(this.findWordsWithout(letters));
   }
 
-  getWordListWithoutWords(words: string[]): string[] {
+  getWordListWithoutWords(words: Word[]): Word[] {
     return this.#list.filter((word) => !words.includes(word));
   }
 
-  removeWords(words: string[]): void {
+  removeWords(words: Word[]): void {
     this.createNewWordList(this.getWordListWithoutWords(words));
   }
 }

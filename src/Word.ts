@@ -1,3 +1,5 @@
+import util from "util";
+
 export type Rarity = {
   char: string;
   val: number;
@@ -28,6 +30,18 @@ export class Word {
 
   get value() {
     return this.#value;
+  }
+
+  [util.inspect.custom]() {
+    return this.#value;
+  }
+
+  getIndex(index: number): string {
+    return this.#value[index];
+  }
+
+  includes(letters: string): boolean {
+    return this.#value.includes(letters);
   }
 
   hasGreenLetters(clueList: ClueList): boolean {
