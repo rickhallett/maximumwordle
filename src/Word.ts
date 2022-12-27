@@ -1,4 +1,4 @@
-import util from "util";
+import util, { deprecate } from "util";
 
 export type Rarity = {
   char: string;
@@ -8,28 +8,46 @@ export type Rarity = {
 export type RarityList = Rarity[];
 
 export enum Indicator {
-  "GREY",
-  "YELLOW",
-  "GREEN",
+  "GREEN" = "GREEN",
+  "YELLOW" = "YELLOW",
+  "GREY" = "GREY",
+  "HIDDEN_YELLOW" = "HIDDEN_YELLOW",
 }
 
 export type Clue = {
+  position: number;
   char: string;
   color: Indicator;
-  index: number;
 };
 
 export type ClueList = Clue[];
 
+export type Guess = {
+  word: Word;
+  clueList: ClueList;
+};
+
+export type GuessWordData = {
+  position: number;
+  char: string;
+  color: Indicator | null;
+};
+
 export class Word {
   #value: string = "";
+  #letters: string[] = [];
 
   constructor(word: string) {
     this.#value = word;
+    this.#letters = word.split("");
   }
 
   get value() {
     return this.#value;
+  }
+
+  get letters() {
+    return this.#letters;
   }
 
   [util.inspect.custom]() {
@@ -48,27 +66,80 @@ export class Word {
     return Boolean(this.#value.length);
   }
 
-  hasGreenLetters(clueList: ClueList): boolean {
+  calculateClue(guess: Word): GuessWordData[] {
+    const guessWordData: GuessWordData[] = guess.letters.map(
+      (char, position) => {
+        const isGreen: boolean = Boolean(this.getIndex(position) === char);
+        const isGrey: boolean = Boolean(!this.#letters.includes(char));
+
+        if (isGreen || isGrey) {
+          return {
+            position,
+            char,
+            color: isGreen ? Indicator.GREEN : Indicator.GREY,
+          };
+        }
+
+        return { position, char, color: Indicator.YELLOW };
+      }
+    );
+
+    const numberOfCharsInGameWord: {
+      [key: string]: { original: number; found: number };
+    } = this.#letters.reduce((store, char) => {
+      return {
+        ...store,
+        [char]: {
+          original: this.#letters.filter((l) => l === char).length,
+          found: 0,
+        },
+      };
+    }, {});
+
+    const wordDataToReturn: GuessWordData[] = guessWordData.map((data, i) => {
+      if (!this.#letters.includes(data.char)) {
+        return data;
+      }
+
+      const og: number = numberOfCharsInGameWord[data.char].original;
+      const inc: number = ++numberOfCharsInGameWord[data.char].found;
+
+      if (inc > og) {
+        return {
+          ...data,
+          color: Indicator.HIDDEN_YELLOW,
+        };
+      }
+
+      return data;
+    });
+
+    return wordDataToReturn;
+  }
+
+  // getGreenLetters(guess: Word)
+
+  hasGreenLetters(clueList: GuessWordData): boolean {
     return false;
   }
 
-  getGreenLetterCount(clueList: ClueList): number {
+  getGreenLetterCount(clueList: GuessWordData): number {
     return 0;
   }
 
-  hasYellowLetters(clueList: ClueList): boolean {
+  hasYellowLetters(clueList: GuessWordData): boolean {
     return false;
   }
 
-  getYellowLetterCount(clueList: ClueList): number {
+  getYellowLetterCount(clueList: GuessWordData): number {
     return 0;
   }
 
-  hasGreyLetters(clueList: ClueList): boolean {
+  hasGreyLetters(clueList: GuessWordData): boolean {
     return false;
   }
 
-  getGreyLetterCount(clueList: ClueList): number {
+  getGreyLetterCount(clueList: GuessWordData): number {
     return 0;
   }
 
