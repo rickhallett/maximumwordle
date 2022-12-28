@@ -1,20 +1,21 @@
 import { wordList } from "./WordList";
 import { tester } from "./Tester";
 import { Word } from "./Word";
+import { log } from "console";
 
-const list = wordList.list;
+const allWords = wordList.list;
+const testWords = ["hello", "world", "wordl", "codes", "doggo", "boyos"].map(
+  (w) => new Word(w)
+);
 
-wordList.createNewWordList(list.slice(0, 27));
-
-// console.log(wordList.listHistory);
+wordList.createNewWordList(testWords);
 
 tester.setWordList(wordList.list);
 tester.setGameWord();
 
-// console.log(tester.gameWord);
-// console.log(tester.processGuess(new Word("hello")));
+log("tester:gameword", tester.gameWord);
 
-const mockGameWord = new Word("hello");
 const mockGuessWord = new Word("world");
 
-console.log(mockGameWord.calculateClue(mockGuessWord));
+tester.processGuess(mockGuessWord);
+tester.prettyPrintGuess(1);

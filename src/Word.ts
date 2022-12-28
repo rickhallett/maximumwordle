@@ -17,7 +17,7 @@ export enum Indicator {
 export type Clue = {
   position: number;
   char: string;
-  color: Indicator | null;
+  color: Indicator;
 };
 
 export type ClueList = Clue[];
@@ -26,8 +26,6 @@ export type Guess = {
   word: Word;
   clueList: ClueList;
 };
-
-export type GuessWordData = Clue[];
 
 export type NumberOfCharsInWord = {
   [key: string]: { original: number; found: number };
@@ -66,7 +64,7 @@ export class Word {
     return Boolean(this.#value.length);
   }
 
-  private _getGuessWordData(guess: Word): GuessWordData {
+  private _getGuessWordData(guess: Word): ClueList {
     return guess.letters.map((char, position) => {
       const isGreen: boolean = Boolean(this.getIndex(position) === char);
       const isGrey: boolean = Boolean(!this.#letters.includes(char));
@@ -96,9 +94,9 @@ export class Word {
   }
 
   private _hideSurplusYellowClues(
-    guessWordData: GuessWordData,
+    guessWordData: ClueList,
     numberOfCharsInGameWord: NumberOfCharsInWord
-  ): GuessWordData {
+  ): ClueList {
     return guessWordData.map((data, i) => {
       if (!this.#letters.includes(data.char)) {
         return data;
@@ -118,7 +116,7 @@ export class Word {
     });
   }
 
-  calculateClue(guess: Word): GuessWordData {
+  calculateClue(guess: Word): ClueList {
     return this._hideSurplusYellowClues(
       this._getGuessWordData(guess),
       this._getNumberOfCharsInGameWord()

@@ -1,12 +1,13 @@
-import { Clue, ClueList, Guess, Word } from "./Word";
+import chalk from "chalk";
+import { log } from "console";
+import { Clue, ClueList, Guess, Indicator, Word } from "./Word";
 
 class Tester {
   #iteration: number = 0;
   #round: number = 0;
   #gameWord: Word = new Word("");
   #wordList: Word[] = [];
-  #clueList: ClueList = [];
-  #guessList: Guess[] = [];
+  #guessList: ClueList[] = [];
 
   get gameWord(): Word {
     if (this.#gameWord === null || !this.#gameWord.isSet()) {
@@ -25,15 +26,28 @@ class Tester {
     this.#iteration++;
   }
 
-  getClueList(index: number): ClueList | Clue {
-    if (index) {
-      return this.#clueList[index];
-    }
-    return this.#clueList;
+  getGuessList(): ClueList[] {
+    return this.#guessList;
   }
 
-  processGuess(guess: Word) {
-    let clues: Clue[] = [];
+  getGuessListRound(round: number): ClueList {
+    return this.#guessList[round - 1];
+  }
+
+  processGuess(guess: Word): void {
+    this.#guessList.push(this.#gameWord.calculateClue(guess));
+    this.#round++;
+  }
+
+  prettyPrintGuess(round: number): void {
+    const format = {
+      [Indicator.GREEN]: chalk.green,
+      [Indicator.YELLOW]: chalk.yellow,
+      [Indicator.GREY]: chalk.gray,
+      [Indicator.HIDDEN_YELLOW]: chalk.gray,
+    };
+    const clueList = this.getGuessListRound(round);
+    log(clueList.map((clue) => format[clue.color](clue.char)).join(""));
   }
 }
 
