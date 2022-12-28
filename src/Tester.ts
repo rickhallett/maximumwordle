@@ -2,6 +2,10 @@ import chalk from "chalk";
 import { log } from "console";
 import { Clue, ClueList, Guess, Indicator, Word } from "./Word";
 
+export type EndIteration = {
+  success: boolean;
+};
+
 class Tester {
   #iteration: number = 0;
   #round: number = 0;
@@ -34,9 +38,21 @@ class Tester {
     return this.#guessList[round - 1];
   }
 
-  processGuess(guess: Word): void {
+  processGuess(guess: Word): void | EndIteration {
+    if (this.#round > 5) {
+      log(chalk.red("Algos failed. Next round..."));
+      return { success: false };
+    }
+
     this.#guessList.push(this.#gameWord.calculateClue(guess));
     this.#round++;
+    this.prettyPrintGuess(this.#round);
+
+    if (this.#gameWord.getGreenLetterCount(guess) === 5) {
+      log(chalk.bgGrey(`${guess.value} is the correct solution!`));
+      this.#iteration++;
+      return { success: true };
+    }
   }
 
   prettyPrintGuess(round: number): void {
@@ -47,7 +63,7 @@ class Tester {
       [Indicator.HIDDEN_YELLOW]: chalk.gray,
     };
     const clueList = this.getGuessListRound(round);
-    log(clueList.map((clue) => format[clue.color](clue.char)).join(""));
+    log(round, clueList.map((clue) => format[clue.color](clue.char)).join(" "));
   }
 }
 
