@@ -33,6 +33,9 @@ export type GuessWordData = {
   color: Indicator | null;
 };
 
+export type NumberOfCharsInWord = {
+  [key: string]: { original: number; found: number };
+};
 export class Word {
   #value: string = "";
   #letters: string[] = [];
@@ -66,27 +69,25 @@ export class Word {
     return Boolean(this.#value.length);
   }
 
-  calculateClue(guess: Word): GuessWordData[] {
-    const guessWordData: GuessWordData[] = guess.letters.map(
-      (char, position) => {
-        const isGreen: boolean = Boolean(this.getIndex(position) === char);
-        const isGrey: boolean = Boolean(!this.#letters.includes(char));
+  private _getGuessWordData(guess: Word): GuessWordData[] {
+    return guess.letters.map((char, position) => {
+      const isGreen: boolean = Boolean(this.getIndex(position) === char);
+      const isGrey: boolean = Boolean(!this.#letters.includes(char));
 
-        if (isGreen || isGrey) {
-          return {
-            position,
-            char,
-            color: isGreen ? Indicator.GREEN : Indicator.GREY,
-          };
-        }
-
-        return { position, char, color: Indicator.YELLOW };
+      if (isGreen || isGrey) {
+        return {
+          position,
+          char,
+          color: isGreen ? Indicator.GREEN : Indicator.GREY,
+        };
       }
-    );
 
-    const numberOfCharsInGameWord: {
-      [key: string]: { original: number; found: number };
-    } = this.#letters.reduce((store, char) => {
+      return { position, char, color: Indicator.YELLOW };
+    });
+  }
+
+  private _getNumberOfCharsInGameWord(): NumberOfCharsInWord {
+    return this.#letters.reduce((store, char) => {
       return {
         ...store,
         [char]: {
@@ -95,8 +96,13 @@ export class Word {
         },
       };
     }, {});
+  }
 
-    const wordDataToReturn: GuessWordData[] = guessWordData.map((data, i) => {
+  private _hideSurplusYellowClues(
+    guessWordData: GuessWordData[],
+    numberOfCharsInGameWord: NumberOfCharsInWord
+  ): GuessWordData[] {
+    return guessWordData.map((data, i) => {
       if (!this.#letters.includes(data.char)) {
         return data;
       }
@@ -113,8 +119,13 @@ export class Word {
 
       return data;
     });
+  }
 
-    return wordDataToReturn;
+  calculateClue(guess: Word): GuessWordData[] {
+    return this._hideSurplusYellowClues(
+      this._getGuessWordData(guess),
+      this._getNumberOfCharsInGameWord()
+    );
   }
 
   // getGreenLetters(guess: Word)
