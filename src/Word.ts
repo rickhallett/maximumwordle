@@ -1,4 +1,4 @@
-import util, { deprecate } from "util";
+import util from "util";
 
 export type Rarity = {
   char: string;
@@ -17,7 +17,7 @@ export enum Indicator {
 export type Clue = {
   position: number;
   char: string;
-  color: Indicator;
+  color: Indicator | null;
 };
 
 export type ClueList = Clue[];
@@ -27,15 +27,12 @@ export type Guess = {
   clueList: ClueList;
 };
 
-export type GuessWordData = {
-  position: number;
-  char: string;
-  color: Indicator | null;
-};
+export type GuessWordData = Clue[];
 
 export type NumberOfCharsInWord = {
   [key: string]: { original: number; found: number };
 };
+
 export class Word {
   #value: string = "";
   #letters: string[] = [];
@@ -69,7 +66,7 @@ export class Word {
     return Boolean(this.#value.length);
   }
 
-  private _getGuessWordData(guess: Word): GuessWordData[] {
+  private _getGuessWordData(guess: Word): GuessWordData {
     return guess.letters.map((char, position) => {
       const isGreen: boolean = Boolean(this.getIndex(position) === char);
       const isGrey: boolean = Boolean(!this.#letters.includes(char));
@@ -99,9 +96,9 @@ export class Word {
   }
 
   private _hideSurplusYellowClues(
-    guessWordData: GuessWordData[],
+    guessWordData: GuessWordData,
     numberOfCharsInGameWord: NumberOfCharsInWord
-  ): GuessWordData[] {
+  ): GuessWordData {
     return guessWordData.map((data, i) => {
       if (!this.#letters.includes(data.char)) {
         return data;
@@ -121,37 +118,41 @@ export class Word {
     });
   }
 
-  calculateClue(guess: Word): GuessWordData[] {
+  calculateClue(guess: Word): GuessWordData {
     return this._hideSurplusYellowClues(
       this._getGuessWordData(guess),
       this._getNumberOfCharsInGameWord()
     );
   }
 
-  // getGreenLetters(guess: Word)
-
-  hasGreenLetters(clueList: GuessWordData): boolean {
-    return false;
+  hasGreenLetters(guess: Word): boolean {
+    return Boolean(this.getGreenLetterCount(guess));
   }
 
-  getGreenLetterCount(clueList: GuessWordData): number {
-    return 0;
+  getGreenLetterCount(guess: Word): number {
+    return this.calculateClue(guess).filter(
+      (clue: Clue) => clue.color === Indicator.GREEN
+    ).length;
   }
 
-  hasYellowLetters(clueList: GuessWordData): boolean {
-    return false;
+  hasYellowLetters(guess: Word): boolean {
+    return Boolean(this.getYellowLetterCount(guess));
   }
 
-  getYellowLetterCount(clueList: GuessWordData): number {
-    return 0;
+  getYellowLetterCount(guess: Word): number {
+    return this.calculateClue(guess).filter(
+      (clue: Clue) => clue.color === Indicator.YELLOW
+    ).length;
   }
 
-  hasGreyLetters(clueList: GuessWordData): boolean {
-    return false;
+  hasGreyLetters(guess: Word): boolean {
+    return Boolean(this.getGreyLetterCount(guess));
   }
 
-  getGreyLetterCount(clueList: GuessWordData): number {
-    return 0;
+  getGreyLetterCount(guess: Word): number {
+    return this.calculateClue(guess).filter(
+      (clue: Clue) => clue.color === Indicator.GREY
+    ).length;
   }
 
   getLetterRarityScore(wordList: string[]): number {

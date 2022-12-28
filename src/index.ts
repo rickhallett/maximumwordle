@@ -14,9 +14,7 @@ tester.setGameWord();
 // console.log(tester.gameWord);
 // console.log(tester.processGuess(new Word("hello")));
 
-const mockGameWord = new Word("dicks");
-const mockGuessWord = new Word("wiscc");
-console.log("game", mockGameWord.letters);
-console.log("mock", mockGuessWord.letters);
+const mockGameWord = new Word("hello");
+const mockGuessWord = new Word("world");
 
-console.log("clue", mockGameWord.calculateClue(mockGuessWord));
+console.log(mockGameWord.calculateClue(mockGuessWord));
