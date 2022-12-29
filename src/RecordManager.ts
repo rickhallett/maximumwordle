@@ -3,21 +3,28 @@ import { Record } from "./Record";
 
 export type RecordList = Record[];
 
-const getGuesses = (record) => (record.success ? record.guesses.length : -1);
+const getGuesses = (record: Record) =>
+  record.success ? record.guesses.length : -1;
 const isSuccess = (num: number) => num > 0;
 const sum = (a: number, b: number) => a + b;
 
 export class RecordManager {
   #history: RecordList = [];
   #currentRecord: Record = new Record();
+  #iteration: number = 0;
 
-  newRecord(): void {
+  newRecord(newWord: Word): void {
     this.addRecordToHistory();
-    this.#currentRecord = new Record();
+    this.#currentRecord = new Record(newWord);
+    this.#iteration++;
   }
 
   addGuessToRecord(clueList: ClueList): void {
     this.#currentRecord.addGuess(clueList);
+  }
+
+  recordSuccess(): void {
+    this.#currentRecord.success = true;
   }
 
   private addRecordToHistory(): void {
@@ -31,3 +38,7 @@ export class RecordManager {
     );
   }
 }
+
+const recordManager = new RecordManager();
+
+export { recordManager };
