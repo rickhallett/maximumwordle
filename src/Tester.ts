@@ -1,17 +1,37 @@
 import chalk from "chalk";
 import { log } from "console";
-import { Clue, ClueList, Guess, Indicator, Word } from "./Word";
+import { RecordManager } from "./RecordManager";
+import { ClueList, Indicator, Word } from "./Word";
+
+export enum Result {
+  "SUCCESS",
+  "FAIL",
+}
 
 export type EndIteration = {
-  success: boolean;
+  result: Result;
 };
 
-class Tester {
-  #iteration: number = 0;
-  #round: number = 0;
+export const isEndIteration = (
+  value: ClueList | EndIteration
+): value is EndIteration => {
+  if ((value as EndIteration).result) {
+    return true;
+  }
+
+  return false;
+};
+
+export class Tester {
+  round: number = 0;
   #gameWord: Word = new Word("");
   #wordList: Word[] = [];
   #guessList: ClueList[] = [];
+  #recordManager: RecordManager;
+
+  constructor(recordManager: RecordManager) {
+    this.#recordManager = recordManager;
+  }
 
   get gameWord(): Word {
     if (this.#gameWord === null || !this.#gameWord.isSet()) {
@@ -27,7 +47,8 @@ class Tester {
   setGameWord() {
     this.#gameWord =
       this.#wordList[Math.floor(Math.random() * this.#wordList.length)];
-    this.#iteration++;
+    this.#recordManager.newRecord(this.#gameWord);
+    log(chalk.yellowBright("Gameword (hidden):", this.gameWord.value));
   }
 
   getGuessList(): ClueList[] {
@@ -38,21 +59,20 @@ class Tester {
     return this.#guessList[round - 1];
   }
 
-  processGuess(guess: Word): void | EndIteration {
-    if (this.#round > 5) {
-      log(chalk.red("Algos failed. Next round..."));
-      return { success: false };
-    }
+  processGuess(guess: Word): ClueList {
+    const clueList: ClueList = this.#gameWord.calculateClue(guess);
 
-    this.#guessList.push(this.#gameWord.calculateClue(guess));
-    this.#round++;
-    this.prettyPrintGuess(this.#round);
+    this.#guessList.push(clueList);
+    this.#recordManager.addGuessToRecord(clueList);
+    this.round++;
+    this.prettyPrintGuess(this.round);
 
-    if (this.#gameWord.getGreenLetterCount(guess) === 5) {
-      log(chalk.bgGrey(`${guess.value} is the correct solution!`));
-      this.#iteration++;
-      return { success: true };
-    }
+    return clueList;
+  }
+
+  nextIteration(): void {
+    this.setGameWord();
+    this.#recordManager.newRecord(this.gameWord);
   }
 
   prettyPrintGuess(round: number): void {
@@ -67,6 +87,6 @@ class Tester {
   }
 }
 
-const tester = new Tester();
+const tester = new Tester(new RecordManager());
 
 export { tester };

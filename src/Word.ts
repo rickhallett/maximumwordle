@@ -49,7 +49,11 @@ export class Word {
   }
 
   [util.inspect.custom]() {
-    return this.#value;
+    if (this.isSet()) {
+      return this.#value;
+    }
+
+    return null;
   }
 
   getIndex(index: number): string {

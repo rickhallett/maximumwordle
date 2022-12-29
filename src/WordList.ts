@@ -1,12 +1,12 @@
 import fs from "fs";
 import { Word } from "./Word";
 
-class WordList {
+export class WordList {
   #file: string = "";
   #list: Word[] = [];
   #listHistory: Word[][] = [];
 
-  constructor(path: fs.PathOrFileDescriptor) {
+  constructor(path: fs.PathOrFileDescriptor = "src/words.txt") {
     console.clear();
     this.readFile(path);
     this.createWordList();
@@ -90,6 +90,6 @@ class WordList {
   }
 }
 
-const wordList = new WordList("src/words.txt");
+const wordList = new WordList();
 
 export { wordList };
