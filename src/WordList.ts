@@ -47,56 +47,98 @@ export class WordList {
     return this.#listHistory.length;
   }
 
-  findWordsWith(letters: string): Word[] {
-    return this.#list.filter((word) => word.includes(letters));
+  keepWords(words: Word[]): void {
+    this.createNewWordList(this.getWordListWithWords(words));
   }
 
-  findWordCountWith(letters: string): number {
-    return this.findWordsWith(letters).length;
+  removeWords(words: Word[]): void {
+    this.createNewWordList(this.getWordListWithoutWords(words));
   }
 
-  findWordsWithout(letters: string): Word[] {
-    return this.#list.filter((word) => !word.includes(letters));
+  removeByLetterIndex(letter: string, index: number): void {
+    this.removeWords(this.findWordsWithLetterAtIndex(letter, index));
   }
 
-  findWordCountWithout(letters: string): number {
-    return this.findWordsWithout(letters).length;
+  findWordsByAltLetterIndex(letter: string, pos: number): Word[] {
+    return this.#list.filter((word) => {
+      word.letters.forEach((char, i) => {
+        if (char === letter && i === pos) {
+          return false;
+        }
+
+        if (char === letter && i !== pos) {
+          return true;
+        }
+
+        console.log({ char, letter, i, pos });
+
+        console.log("you should never see this log.");
+      });
+    });
+  }
+
+  keepWordsByAltLetterIndex(letter: string, index: number): void {
+    this.keepWords(this.findWordsByAltLetterIndex(letter, index));
   }
 
   findWordsWithLetterAtIndex(letter: string, index: number): Word[] {
     return this.#list.filter((word) => word.getIndex(index) === letter);
   }
 
-  findWordCountWithLetterAtIndex(letter: string, index: number): number {
-    return this.findWordsWithLetterAtIndex(letter, index).length;
-  }
-
-  findWordsWithIntersection(listA: string[], listB: string[]) {
-    return _.intersection(listA, listB);
-  }
-
-  joinWordLists(wordLists: Word[][]): Word[] {
-    let joined: Word[] = [];
-    return joined.concat(...wordLists);
-  }
-
-  keepWordsWith(letters: string): void {
-    this.createNewWordList(this.findWordsWith(letters));
-  }
-
-  removeWordsWith(letters: string) {
-    this.createNewWordList(this.findWordsWithout(letters));
+  getWordListWithWords(words: Word[]): Word[] {
+    return this.#list.filter((word) => words.includes(word));
   }
 
   getWordListWithoutWords(words: Word[]): Word[] {
     return this.#list.filter((word) => !words.includes(word));
-  }
-
-  removeWords(words: Word[]): void {
-    this.createNewWordList(this.getWordListWithoutWords(words));
   }
 }
 
 const wordList = new WordList();
 
 export { wordList };
+
+// removeWordsByAltLetterIndex(letter: string, index: number): void {
+//   this.removeWords(this.findWordsByAltLetterIndex(letter, index));
+// }
+
+// keepByLetterIndex(letter: string, index: number): void {
+//   this.keepWords(this.findWordsWithLetterAtIndex(letter, index));
+// }
+
+// findWordsWith(letters: string): Word[] {
+//   return this.#list.filter((word) => word.includes(letters));
+// }
+
+// findWordCountWith(letters: string): number {
+//   return this.findWordsWith(letters).length;
+// }
+
+// findWordsWithout(letters: string): Word[] {
+//   return this.#list.filter((word) => !word.includes(letters));
+// }
+
+// findWordCountWithout(letters: string): number {
+//   return this.findWordsWithout(letters).length;
+// }
+
+// findWordCountWithLetterAtIndex(letter: string, index: number): number {
+//   return this.findWordsWithLetterAtIndex(letter, index).length;
+// }
+
+// findWordsWithIntersection(listA: string[], listB: string[]) {
+//   return _.intersection(listA, listB);
+// }
+
+// joinWordLists(wordLists: Word[][]): Word[] {
+//   let joined: Word[] = [];
+//   return joined.concat(...wordLists);
+// }
+
+// keepWordsWith(letters: string): void {
+//   this.createNewWordList(this.findWordsWith(letters));
+// }
+
+// removeWordsWith(letters: string) {
+//   this.createNewWordList(this.findWordsWithout(letters));
+// }

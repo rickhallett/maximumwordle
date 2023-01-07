@@ -23,7 +23,7 @@ export const isEndIteration = (
 };
 
 export class Tester {
-  #round: number = 1;
+  #round: number = 0;
   #gameWord: Word = new Word("");
   #wordList: Word[] = [];
   #guessList: ClueList[] = [];
@@ -76,10 +76,6 @@ export class Tester {
     this.prettyPrintGuess(this.#round);
 
     return clueList;
-  }
-
-  getClueForWord(word: Word): ClueList {
-    return this.#gameWord.calculateClue(word);
   }
 
   recordFailure(): void {

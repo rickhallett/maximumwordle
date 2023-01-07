@@ -12,62 +12,16 @@ const testWords = [
   "codes",
   "doggo",
   "boyos",
-  "happy",
-  "drink",
-  "foods",
-  "bitty",
+  // "happy",
+  // "drink",
+  // "foods",
+  // "bitty",
 ].map((w) => new Word(w));
 
 export enum ClueResult {
   "SUCCESS",
   "FAIL",
 }
-
-/**
- * SOLUTION
- *
- * main while loop: while !round_complete, do
- *    if round === 6
- *        round_complete = true
- *        record failure
- *        restart()
- *
- *    guess = getGuess(round)
- *    clue = processGuess(guess)
- *
- *    if clue is all green
- *        record success
- *        restart()
- *
- *    message tester to restart
- *
- *
- * restart()
- *     message tester to reset
- *        tester resets itself/wordlist
- *
- * processGuess(guess)
- *    clue = tester.processGuess(guess)
- *    filterWordlist(clue)
- *    rtn clue
- *
- * getClue(guess)
- *    convert guess to clue object (position, char, color)
- *    return clue object
- *
- * filterWordlist(clue)
- *    filter wordlist to remove words containing gray letters
- *    filter wordlist to remove words not containing green letters
- *    filter wordlist to remove words that don't contain the correct number of yellow letters
- *
- * getGuess(round)
- *    if round === 0
- *        get initial guess (from configurable object?)
- *    else
- *        select a random word from filtered wordlist
- *
- *    rtn guess
- */
 
 export class Solver {
   #tester: Tester;
@@ -99,37 +53,36 @@ export class Solver {
       const guess = this.getGuess();
       const clue = this.#tester.processGuess(guess);
 
-      this.filterWordList(clue);
-
       if (this.isClueAllGreen(clue)) {
         roundComplete = true;
         this.#tester.recordSuccess();
       }
+
+      this.filterWordList(clue, guess);
     }
   }
 
-  filterWordList(clue: ClueList): void {
-    this.removeWordsWithGreyLetters();
+  filterWordList(clue: ClueList, guess: Word): void {
+    clue.forEach(({ position, char, color }) => {
+      switch (color) {
+        case Indicator.GREEN:
+          this.#wordList.keepWordsByAltLetterIndex(char, position);
+          break;
+        case Indicator.GREY:
+          this.#wordList.removeByLetterIndex(char, position);
+          break;
+        case Indicator.YELLOW:
+          this.#wordList.keepWordsByAltLetterIndex(char, position);
+          break;
+        default:
+          throw new Error("Unknown Indicator");
+      }
+    });
   }
-
-  removeWordsWithGreyLetters(): void {
-    //TODO: do a perf check: if slow, optimise by use
-    this.#wordList.removeWords(
-      this.#wordList.list.filter((word) =>
-        this.#tester
-          .getClueForWord(word)
-          .filter((char) => char.char === Indicator.GREY)
-      )
-    );
-  }
-
-  keepWordsWithGreenLetters(): void {}
-
-  keepWordsWithYellowLetters(letters: string[]) {}
 
   getGuess() {
     if (this.#tester.isFirstRound()) {
-      return new Word("ADIEU");
+      return new Word("adieu");
     }
 
     return this.chooseRandomWordFromList();
@@ -149,6 +102,4 @@ export class Solver {
       Math.floor(Math.random() * this.#wordList.list.length)
     ];
   }
-
-  makeNewGuess(): Word {}
 }
