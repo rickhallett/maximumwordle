@@ -27,6 +27,10 @@ export class RecordManager {
     this.#currentRecord.success = true;
   }
 
+  recordFailure(): void {
+    this.#currentRecord.success = false;
+  }
+
   private addRecordToHistory(): void {
     this.#history.push(this.#currentRecord);
   }

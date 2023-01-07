@@ -1,4 +1,5 @@
 import fs from "fs";
+import _ from "lodash";
 import { Word } from "./Word";
 
 export class WordList {
@@ -31,7 +32,9 @@ export class WordList {
   }
 
   private createWordList(separator: string = "\n"): void {
-    this.#list = this.#file.split(separator).map((word) => new Word(word));
+    this.#list = this.#file
+      .split(separator)
+      .map((word) => new Word(word.toUpperCase()));
   }
 
   createNewWordList(newWordList: Word[]): Word[] {
@@ -66,6 +69,10 @@ export class WordList {
 
   findWordCountWithLetterAtIndex(letter: string, index: number): number {
     return this.findWordsWithLetterAtIndex(letter, index).length;
+  }
+
+  findWordsWithIntersection(listA: string[], listB: string[]) {
+    return _.intersection(listA, listB);
   }
 
   joinWordLists(wordLists: Word[][]): Word[] {

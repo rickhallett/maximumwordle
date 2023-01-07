@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { log } from "console";
 import { RecordManager } from "./RecordManager";
-import { ClueList, Indicator, Word } from "./Word";
+import { Clue, ClueList, Indicator, Word } from "./Word";
 
 export enum Result {
   "SUCCESS",
@@ -23,7 +23,7 @@ export const isEndIteration = (
 };
 
 export class Tester {
-  round: number = 0;
+  #round: number = 1;
   #gameWord: Word = new Word("");
   #wordList: Word[] = [];
   #guessList: ClueList[] = [];
@@ -40,11 +40,19 @@ export class Tester {
     return this.#gameWord;
   }
 
-  setWordList(wordList: Word[]) {
+  isGameOver(): boolean {
+    return this.#round === 6;
+  }
+
+  isFirstRound(): boolean {
+    return this.#round === 0;
+  }
+
+  setWordList(wordList: Word[]): void {
     this.#wordList = wordList;
   }
 
-  setGameWord() {
+  setGameWord(): void {
     this.#gameWord =
       this.#wordList[Math.floor(Math.random() * this.#wordList.length)];
     this.#recordManager.newRecord(this.#gameWord);
@@ -64,10 +72,24 @@ export class Tester {
 
     this.#guessList.push(clueList);
     this.#recordManager.addGuessToRecord(clueList);
-    this.round++;
-    this.prettyPrintGuess(this.round);
+    this.#round++;
+    this.prettyPrintGuess(this.#round);
 
     return clueList;
+  }
+
+  getClueForWord(word: Word): ClueList {
+    return this.#gameWord.calculateClue(word);
+  }
+
+  recordFailure(): void {
+    this.#recordManager.recordFailure();
+    this.nextIteration();
+  }
+
+  recordSuccess(): void {
+    this.#recordManager.recordSuccess();
+    this.nextIteration();
   }
 
   nextIteration(): void {

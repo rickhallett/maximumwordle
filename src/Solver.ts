@@ -23,6 +23,52 @@ export enum ClueResult {
   "FAIL",
 }
 
+/**
+ * SOLUTION
+ *
+ * main while loop: while !round_complete, do
+ *    if round === 6
+ *        round_complete = true
+ *        record failure
+ *        restart()
+ *
+ *    guess = getGuess(round)
+ *    clue = processGuess(guess)
+ *
+ *    if clue is all green
+ *        record success
+ *        restart()
+ *
+ *    message tester to restart
+ *
+ *
+ * restart()
+ *     message tester to reset
+ *        tester resets itself/wordlist
+ *
+ * processGuess(guess)
+ *    clue = tester.processGuess(guess)
+ *    filterWordlist(clue)
+ *    rtn clue
+ *
+ * getClue(guess)
+ *    convert guess to clue object (position, char, color)
+ *    return clue object
+ *
+ * filterWordlist(clue)
+ *    filter wordlist to remove words containing gray letters
+ *    filter wordlist to remove words not containing green letters
+ *    filter wordlist to remove words that don't contain the correct number of yellow letters
+ *
+ * getGuess(round)
+ *    if round === 0
+ *        get initial guess (from configurable object?)
+ *    else
+ *        select a random word from filtered wordlist
+ *
+ *    rtn guess
+ */
+
 export class Solver {
   #tester: Tester;
   #wordList: WordList;
@@ -37,41 +83,60 @@ export class Solver {
     this.#wordList.createNewWordList(testWords);
     this.#tester.setWordList(this.#wordList.list);
     this.#tester.setGameWord();
-    this.beginGuessing();
+    this.startRound();
   }
 
-  beginGuessing() {
+  startRound() {
     let roundComplete: boolean = false;
-    let guess: Word = new Word("");
 
     while (!roundComplete) {
-      if (this.#tester.round === 6) {
+      if (this.#tester.isGameOver()) {
         roundComplete = true;
-        log(chalk.bgRed("FAIL"));
-        break;
+        this.#tester.recordFailure();
+        this.resetWordList();
       }
 
-      const clue: ClueList = this.makeGuess(guess);
-      const clueResult: ClueResult = this.processClue(clue);
+      const guess = this.getGuess();
+      const clue = this.#tester.processGuess(guess);
 
-      switch (clueResult) {
-        case ClueResult.SUCCESS:
-          roundComplete = true;
-          log(chalk.bgGreenBright("SUCCESS"));
-          break;
-        default:
-          guess = this.makeNewGuess();
-          break;
+      this.filterWordList(clue);
+
+      if (this.isClueAllGreen(clue)) {
+        roundComplete = true;
+        this.#tester.recordSuccess();
       }
     }
   }
 
-  processClue(clue: ClueList): ClueResult {
-    if (clue.filter((clue) => clue.color === Indicator.GREEN).length === 5) {
-      return ClueResult.SUCCESS;
+  filterWordList(clue: ClueList): void {
+    this.removeWordsWithGreyLetters();
+  }
+
+  removeWordsWithGreyLetters(): void {
+    //TODO: do a perf check: if slow, optimise by use
+    this.#wordList.removeWords(
+      this.#wordList.list.filter((word) =>
+        this.#tester
+          .getClueForWord(word)
+          .filter((char) => char.char === Indicator.GREY)
+      )
+    );
+  }
+
+  keepWordsWithGreenLetters(): void {}
+
+  keepWordsWithYellowLetters(letters: string[]) {}
+
+  getGuess() {
+    if (this.#tester.isFirstRound()) {
+      return new Word("ADIEU");
     }
 
-    return ClueResult.FAIL;
+    return this.chooseRandomWordFromList();
+  }
+
+  isClueAllGreen(clue: ClueList) {
+    return clue.every((char) => char.color === Indicator.GREEN);
   }
 
   resetWordList() {
@@ -79,20 +144,11 @@ export class Solver {
     this.#wordList = new WordList();
   }
 
-  makeFirstGuess(): Word {
-    return testWords[Math.floor(Math.random() * testWords.length)];
+  chooseRandomWordFromList(): Word {
+    return this.#wordList.list[
+      Math.floor(Math.random() * this.#wordList.list.length)
+    ];
   }
 
-  makeNewGuess(): Word {
-    //TODO: dynamic strategy
-    return this.makeFirstGuess();
-  }
-
-  makeGuess(guess: Word): ClueList {
-    if (guess.isSet()) {
-      return this.#tester.processGuess(guess);
-    }
-
-    return this.#tester.processGuess(this.makeFirstGuess());
-  }
+  makeNewGuess(): Word {}
 }
