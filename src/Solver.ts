@@ -62,14 +62,34 @@ export class Solver {
   }
 
   filterWordList(clue: ClueList): void {
-    log("filtering by", clue);
     clue?.forEach(({ position, char, color }, i) => {
       switch (color) {
         case Indicator.GREEN:
           this.#wordList.keepByLetterIndex(char, position);
           break;
         case Indicator.GREY:
-          this.#wordList.removeWordsWith(char);
+          let skip = false;
+          if (
+            clue.filter((c) => c.color === Indicator.YELLOW && c.char === char)
+              .length > 0
+          ) {
+            log(
+              chalk.blueBright("grey could exist; skip remove on this basis")
+            );
+            skip = true;
+          }
+
+          if (
+            clue.filter((c) => c.color === Indicator.GREEN && c.char === char)
+              .length > 0
+          ) {
+            log(chalk.blueBright("grey could be green; skip!"));
+            skip = true;
+          }
+
+          if (!skip) {
+            this.#wordList.removeWordsWith(char);
+          }
           break;
         case Indicator.YELLOW:
           this.#wordList.keepWordsByAltLetterIndex(char, position);
@@ -99,14 +119,10 @@ export class Solver {
   }
 
   chooseRandomWordFromList(): Word {
-    log("list length", this.#wordList.list.length);
-    log("list:", this.#wordList.list);
     const newWord =
       this.#wordList.list[
         Math.floor(Math.random() * this.#wordList.list.length)
       ];
-
-    log("new word:", newWord);
 
     return newWord;
   }
