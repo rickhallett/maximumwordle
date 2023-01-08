@@ -136,46 +136,4 @@ export class Word {
 
     return this._convertHiddenToGrey(withHidden);
   }
-
-  hasGreenLetters(guess: Word): boolean {
-    return Boolean(this.getGreenLetterCount(guess));
-  }
-
-  getGreenLetterCount(guess: Word): number {
-    return this.calculateClue(guess).filter(
-      (clue: Clue) => clue.color === Indicator.GREEN
-    ).length;
-  }
-
-  hasYellowLetters(guess: Word): boolean {
-    return Boolean(this.getYellowLetterCount(guess));
-  }
-
-  getYellowLetterCount(guess: Word): number {
-    return this.calculateClue(guess).filter(
-      (clue: Clue) => clue.color === Indicator.YELLOW
-    ).length;
-  }
-
-  hasGreyLetters(guess: Word): boolean {
-    return Boolean(this.getGreyLetterCount(guess));
-  }
-
-  getGreyLetterCount(guess: Word): number {
-    return this.calculateClue(guess).filter(
-      (clue: Clue) => clue.color === Indicator.GREY
-    ).length;
-  }
-
-  getLetterRarityScore(wordList: string[]): number {
-    // return numeric value for sorting lists
-    // Rarity passed in as this will be dynamic depending on list
-    const rarity: RarityList = this.computeNewRarityValues(wordList);
-    return 0;
-  }
-
-  computeNewRarityValues(wordList: string[]): RarityList {
-    // const r = wordList.map(word => )
-    return [];
-  }
 }

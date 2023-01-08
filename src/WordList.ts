@@ -59,10 +59,6 @@ export class WordList {
     this.keepWords(this.findWordsWithLetterAtIndex(letter, index));
   }
 
-  removeByLetterIndex(letter: string, index: number): void {
-    this.removeWords(this.findWordsWithLetterAtIndex(letter, index));
-  }
-
   removeWordsWith(letters: string) {
     this.createNewWordList(
       this.#list.filter((word) => !word.includes(letters))
@@ -111,40 +107,3 @@ export class WordList {
 const wordList = new WordList();
 
 export { wordList };
-
-// removeWordsByAltLetterIndex(letter: string, index: number): void {
-//   this.removeWords(this.findWordsByAltLetterIndex(letter, index));
-// }
-
-// findWordsWith(letters: string): Word[] {
-//   return this.#list.filter((word) => word.includes(letters));
-// }
-
-// findWordCountWith(letters: string): number {
-//   return this.findWordsWith(letters).length;
-// }
-
-// findWordsWithout(letters: string): Word[] {
-//   return this.#list.filter((word) => !word.includes(letters));
-// }
-
-// findWordCountWithout(letters: string): number {
-//   return this.findWordsWithout(letters).length;
-// }
-
-// findWordCountWithLetterAtIndex(letter: string, index: number): number {
-//   return this.findWordsWithLetterAtIndex(letter, index).length;
-// }
-
-// findWordsWithIntersection(listA: string[], listB: string[]) {
-//   return _.intersection(listA, listB);
-// }
-
-// joinWordLists(wordLists: Word[][]): Word[] {
-//   let joined: Word[] = [];
-//   return joined.concat(...wordLists);
-// }
-
-// keepWordsWith(letters: string): void {
-//   this.createNewWordList(this.findWordsWith(letters));
-// }
