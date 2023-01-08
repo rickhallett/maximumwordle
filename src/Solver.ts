@@ -13,6 +13,7 @@ export enum ClueResult {
 }
 
 export class Solver {
+  console: boolean = false;
   #tester: Tester;
   #wordList: WordList;
   #wordLists: WordList[] = [];
@@ -23,25 +24,45 @@ export class Solver {
   }
 
   startGame() {
-    // this.#wordList.createNewWordList(testWords);
     this.#tester.setWordList(this.#wordList.list);
     this.#tester.setGameWord();
-    try {
-      this.startRound();
-    } catch (error) {
-      log(chalk.red("Something occurred."));
-    }
+    this.startRound();
   }
 
   startRound() {
+    if (this.#tester.isIterationLimit()) {
+      log(chalk.bgWhite("Simulation complete."));
+      log(
+        "Avg:",
+        this.#tester.recordManager.history.reduce(
+          (sum, { guesses }) => (sum += guesses.length),
+          0
+        ) / this.#tester.recordManager.history.length
+      );
+      log(
+        "% win:",
+        (this.#tester.recordManager.history.filter((r) => r.success).length /
+          this.#tester.recordManager.history.length) *
+          100
+      );
+      process.exit();
+    }
+
+    if (this.#tester.isIterationInHundred()) {
+      log(chalk.bgGrey("Loading...", this.#tester.iteration));
+    }
+
+    // log(chalk.bgGrey("Simulation starting..."));
+
     let roundComplete: boolean = false;
 
     while (!roundComplete) {
       if (this.#tester.isGameOver()) {
-        log(chalk.red("Better luck next time, boyo..."));
+        if (this.console) log(chalk.red("Better luck next time, boyo..."));
         roundComplete = true;
         this.#tester.recordFailure();
         this.resetWordList();
+        this.startRound();
         return;
       }
 
@@ -49,11 +70,11 @@ export class Solver {
       const clue = this.#tester.processGuess(guess);
 
       if (this.isClueAllGreen(clue)) {
-        log(chalk.greenBright("UBER BOYO!!!"));
+        if (this.console) log(chalk.greenBright("UBER BOYO!!!"));
         roundComplete = true;
         this.#tester.recordSuccess();
         this.resetWordList();
-        // this.startRound();
+        this.startRound();
         return;
       }
 
@@ -68,26 +89,7 @@ export class Solver {
           this.#wordList.keepByLetterIndex(char, position);
           break;
         case Indicator.GREY:
-          let skip = false;
-          if (
-            clue.filter((c) => c.color === Indicator.YELLOW && c.char === char)
-              .length > 0
-          ) {
-            log(
-              chalk.blueBright("grey could exist; skip remove on this basis")
-            );
-            skip = true;
-          }
-
-          if (
-            clue.filter((c) => c.color === Indicator.GREEN && c.char === char)
-              .length > 0
-          ) {
-            log(chalk.blueBright("grey could be green; skip!"));
-            skip = true;
-          }
-
-          if (!skip) {
+          if (!this.shouldSkip(clue, char)) {
             this.#wordList.removeWordsWith(char);
           }
           break;
@@ -107,6 +109,27 @@ export class Solver {
     }
 
     return this.chooseRandomWordFromList();
+  }
+
+  shouldSkip(clue: ClueList, char: string): boolean {
+    return (
+      this.clueHasCharAsGreen(clue, char) ||
+      this.clueHasCharAsYellow(clue, char)
+    );
+  }
+
+  clueHasCharAsYellow(clue: ClueList, char: string): boolean {
+    return (
+      clue.filter((c) => c.color === Indicator.YELLOW && c.char === char)
+        .length > 0
+    );
+  }
+
+  clueHasCharAsGreen(clue: ClueList, char: string): boolean {
+    return (
+      clue.filter((c) => c.color === Indicator.GREEN && c.char === char)
+        .length > 0
+    );
   }
 
   isClueAllGreen(clue: ClueList) {

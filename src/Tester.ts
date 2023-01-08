@@ -23,7 +23,9 @@ export const isEndIteration = (
 };
 
 export class Tester {
+  console: boolean = false;
   #round: number = 0;
+  #iteration: number = 0;
   #gameWord: Word = new Word("");
   #wordList: Word[] = [];
   #guessList: ClueList[] = [];
@@ -40,12 +42,28 @@ export class Tester {
     return this.#gameWord;
   }
 
+  get recordManager(): RecordManager {
+    return this.#recordManager;
+  }
+
+  get iteration(): number {
+    return this.#iteration;
+  }
+
   isGameOver(): boolean {
     return this.#round === 6;
   }
 
   isFirstRound(): boolean {
     return this.#round === 0;
+  }
+
+  isIterationLimit(): boolean {
+    return this.#iteration > 2000;
+  }
+
+  isIterationInHundred(): boolean {
+    return this.#iteration % 10 === 0;
   }
 
   setWordList(wordList: Word[]): void {
@@ -56,7 +74,8 @@ export class Tester {
     this.#gameWord =
       this.#wordList[Math.floor(Math.random() * this.#wordList.length)];
     this.#recordManager.newRecord(this.#gameWord);
-    log(chalk.yellowBright("Gameword (hidden):", this.gameWord.value));
+    if (this.console)
+      log(chalk.yellowBright("Gameword (hidden):", this.gameWord.value));
   }
 
   getGuessList(): ClueList[] {
@@ -89,8 +108,9 @@ export class Tester {
   }
 
   nextIteration(): void {
+    this.#round = 0;
+    this.#iteration++;
     this.setGameWord();
-    this.#recordManager.newRecord(this.gameWord);
   }
 
   prettyPrintGuess(round: number): void {
@@ -101,7 +121,11 @@ export class Tester {
       [Indicator.HIDDEN_YELLOW]: chalk.gray,
     };
     const clueList = this.getGuessListRound(round);
-    log(round, clueList.map((clue) => format[clue.color](clue.char)).join(" "));
+    if (this.console)
+      log(
+        round,
+        clueList.map((clue) => format[clue.color](clue.char)).join(" ")
+      );
   }
 }
 

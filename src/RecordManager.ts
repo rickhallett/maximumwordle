@@ -13,6 +13,10 @@ export class RecordManager {
   #currentRecord: Record = new Record();
   #iteration: number = 0;
 
+  get history() {
+    return this.#history;
+  }
+
   newRecord(newWord: Word): void {
     this.addRecordToHistory();
     this.#currentRecord = new Record(newWord);

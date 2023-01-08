@@ -8,7 +8,7 @@ export class WordList {
   #list: Word[] = [];
   #listHistory: Word[][] = [];
 
-  constructor(path: fs.PathOrFileDescriptor = "src/words.txt") {
+  constructor(path: fs.PathOrFileDescriptor = "src/reduced_words.txt") {
     this.readFile(path);
     this.createWordList();
   }
