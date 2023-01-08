@@ -97,6 +97,14 @@ export class Word {
     }, {});
   }
 
+  private _convertHiddenToGrey(clueList: ClueList) {
+    return clueList.map((clue) =>
+      clue.color === Indicator.HIDDEN_YELLOW
+        ? { ...clue, color: Indicator.GREY }
+        : { ...clue }
+    );
+  }
+
   private _hideSurplusYellowClues(
     guessWordData: ClueList,
     numberOfCharsInGameWord: NumberOfCharsInWord
@@ -121,10 +129,12 @@ export class Word {
   }
 
   calculateClue(guess: Word): ClueList {
-    return this._hideSurplusYellowClues(
+    const withHidden = this._hideSurplusYellowClues(
       this._getGuessWordData(guess),
       this._getNumberOfCharsInGameWord()
     );
+
+    return this._convertHiddenToGrey(withHidden);
   }
 
   hasGreenLetters(guess: Word): boolean {

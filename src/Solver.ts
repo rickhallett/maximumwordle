@@ -26,7 +26,11 @@ export class Solver {
     // this.#wordList.createNewWordList(testWords);
     this.#tester.setWordList(this.#wordList.list);
     this.#tester.setGameWord();
-    this.startRound();
+    try {
+      this.startRound();
+    } catch (error) {
+      log(chalk.red("Something occurred."));
+    }
   }
 
   startRound() {
@@ -38,7 +42,6 @@ export class Solver {
         roundComplete = true;
         this.#tester.recordFailure();
         this.resetWordList();
-        this.#tester.nextIteration();
         return;
       }
 
@@ -50,15 +53,16 @@ export class Solver {
         roundComplete = true;
         this.#tester.recordSuccess();
         this.resetWordList();
-        this.#tester.nextIteration();
+        // this.startRound();
         return;
       }
 
-      this.filterWordList(clue, guess);
+      this.filterWordList(clue);
     }
   }
 
-  filterWordList(clue: ClueList, guess: Word): void {
+  filterWordList(clue: ClueList): void {
+    log("filtering by", clue);
     clue?.forEach(({ position, char, color }, i) => {
       switch (color) {
         case Indicator.GREEN:
@@ -96,6 +100,7 @@ export class Solver {
 
   chooseRandomWordFromList(): Word {
     log("list length", this.#wordList.list.length);
+    log("list:", this.#wordList.list);
     const newWord =
       this.#wordList.list[
         Math.floor(Math.random() * this.#wordList.list.length)
