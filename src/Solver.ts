@@ -5,18 +5,7 @@ import { ClueList, Indicator, Word } from "./Word";
 import { log } from "console";
 import chalk from "chalk";
 
-const testWords = [
-  "hello",
-  "world",
-  "wordl",
-  "codes",
-  "doggo",
-  "boyos",
-  // "happy",
-  // "drink",
-  // "foods",
-  // "bitty",
-].map((w) => new Word(w));
+const testWords = ["hello", "world"].map((w) => new Word(w));
 
 export enum ClueResult {
   "SUCCESS",
@@ -34,13 +23,15 @@ export class Solver {
   }
 
   startGame() {
-    this.#wordList.createNewWordList(testWords);
+    console.clear();
+    // this.#wordList.createNewWordList(testWords);
     this.#tester.setWordList(this.#wordList.list);
     this.#tester.setGameWord();
     this.startRound();
   }
 
   startRound() {
+    log("SR");
     let roundComplete: boolean = false;
 
     while (!roundComplete) {
@@ -48,6 +39,8 @@ export class Solver {
         roundComplete = true;
         this.#tester.recordFailure();
         this.resetWordList();
+        this.#tester.nextIteration();
+        return;
       }
 
       const guess = this.getGuess();
@@ -56,6 +49,9 @@ export class Solver {
       if (this.isClueAllGreen(clue)) {
         roundComplete = true;
         this.#tester.recordSuccess();
+        this.resetWordList();
+        this.#tester.nextIteration();
+        return;
       }
 
       this.filterWordList(clue, guess);
@@ -63,12 +59,15 @@ export class Solver {
   }
 
   filterWordList(clue: ClueList, guess: Word): void {
-    clue.forEach(({ position, char, color }) => {
+    clue.forEach(({ position, char, color }, i) => {
+      // log("list", this.#wordList.list);
       switch (color) {
         case Indicator.GREEN:
-          this.#wordList.keepWordsByAltLetterIndex(char, position);
+          // log("keep letter (g)", char, position);
+          this.#wordList.keepByLetterIndex(char, position);
           break;
         case Indicator.GREY:
+          // log("remove letter", char, position);
           this.#wordList.removeByLetterIndex(char, position);
           break;
         case Indicator.YELLOW:
@@ -82,7 +81,7 @@ export class Solver {
 
   getGuess() {
     if (this.#tester.isFirstRound()) {
-      return new Word("adieu");
+      return new Word("ADIEU");
     }
 
     return this.chooseRandomWordFromList();

@@ -1,3 +1,4 @@
+import { log } from "console";
 import fs from "fs";
 import _ from "lodash";
 import { Word } from "./Word";
@@ -8,7 +9,6 @@ export class WordList {
   #listHistory: Word[][] = [];
 
   constructor(path: fs.PathOrFileDescriptor = "src/words.txt") {
-    console.clear();
     this.readFile(path);
     this.createWordList();
   }
@@ -55,25 +55,44 @@ export class WordList {
     this.createNewWordList(this.getWordListWithoutWords(words));
   }
 
+  keepByLetterIndex(letter: string, index: number): void {
+    this.keepWords(this.findWordsWithLetterAtIndex(letter, index));
+  }
+
   removeByLetterIndex(letter: string, index: number): void {
     this.removeWords(this.findWordsWithLetterAtIndex(letter, index));
   }
 
   findWordsByAltLetterIndex(letter: string, pos: number): Word[] {
     return this.#list.filter((word) => {
-      word.letters.forEach((char, i) => {
-        if (char === letter && i === pos) {
-          return false;
+      // log("shall we keep:", word);
+      let rtn = false;
+      // word.letters.forEach((char, i) => {
+      // log("char", char, "letter", letter, "i", i, "pos", pos);
+      //   if (char === letter && i === pos) {
+      //     rtn = false;
+      //   }
+
+      //   if (char === letter && i !== pos) {
+      //     rtn = true;
+      //   }
+      // });
+      // log({ rtn });
+
+      let idx = 0;
+      for (let char of word.letters) {
+        if (char === letter && idx === pos) {
+          rtn = false;
+          break;
         }
 
-        if (char === letter && i !== pos) {
-          return true;
+        if (char === letter && idx !== pos) {
+          rtn = true;
+          break;
         }
+      }
 
-        console.log({ char, letter, i, pos });
-
-        console.log("you should never see this log.");
-      });
+      return rtn;
     });
   }
 
@@ -100,10 +119,6 @@ export { wordList };
 
 // removeWordsByAltLetterIndex(letter: string, index: number): void {
 //   this.removeWords(this.findWordsByAltLetterIndex(letter, index));
-// }
-
-// keepByLetterIndex(letter: string, index: number): void {
-//   this.keepWords(this.findWordsWithLetterAtIndex(letter, index));
 // }
 
 // findWordsWith(letters: string): Word[] {
