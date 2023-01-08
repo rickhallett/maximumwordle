@@ -23,7 +23,6 @@ export class Solver {
   }
 
   startGame() {
-    console.clear();
     // this.#wordList.createNewWordList(testWords);
     this.#tester.setWordList(this.#wordList.list);
     this.#tester.setGameWord();
@@ -31,11 +30,11 @@ export class Solver {
   }
 
   startRound() {
-    log("SR");
     let roundComplete: boolean = false;
 
     while (!roundComplete) {
       if (this.#tester.isGameOver()) {
+        log(chalk.red("Better luck next time, boyo..."));
         roundComplete = true;
         this.#tester.recordFailure();
         this.resetWordList();
@@ -47,6 +46,7 @@ export class Solver {
       const clue = this.#tester.processGuess(guess);
 
       if (this.isClueAllGreen(clue)) {
+        log(chalk.greenBright("UBER BOYO!!!"));
         roundComplete = true;
         this.#tester.recordSuccess();
         this.resetWordList();
@@ -59,21 +59,19 @@ export class Solver {
   }
 
   filterWordList(clue: ClueList, guess: Word): void {
-    clue.forEach(({ position, char, color }, i) => {
-      // log("list", this.#wordList.list);
+    clue?.forEach(({ position, char, color }, i) => {
       switch (color) {
         case Indicator.GREEN:
-          // log("keep letter (g)", char, position);
           this.#wordList.keepByLetterIndex(char, position);
           break;
         case Indicator.GREY:
-          // log("remove letter", char, position);
-          this.#wordList.removeByLetterIndex(char, position);
+          this.#wordList.removeWordsWith(char);
           break;
         case Indicator.YELLOW:
           this.#wordList.keepWordsByAltLetterIndex(char, position);
           break;
         default:
+          log(color);
           throw new Error("Unknown Indicator");
       }
     });
@@ -97,8 +95,14 @@ export class Solver {
   }
 
   chooseRandomWordFromList(): Word {
-    return this.#wordList.list[
-      Math.floor(Math.random() * this.#wordList.list.length)
-    ];
+    log("list length", this.#wordList.list.length);
+    const newWord =
+      this.#wordList.list[
+        Math.floor(Math.random() * this.#wordList.list.length)
+      ];
+
+    log("new word:", newWord);
+
+    return newWord;
   }
 }

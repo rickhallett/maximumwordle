@@ -39,7 +39,7 @@ export class WordList {
 
   createNewWordList(newWordList: Word[]): Word[] {
     this.#listHistory.push(this.#list.slice());
-    this.#list = newWordList.slice() || this.#list.slice();
+    this.#list = newWordList.slice();
     return this.#list.slice();
   }
 
@@ -63,21 +63,15 @@ export class WordList {
     this.removeWords(this.findWordsWithLetterAtIndex(letter, index));
   }
 
+  removeWordsWith(letters: string) {
+    this.createNewWordList(
+      this.#list.filter((word) => !word.includes(letters))
+    );
+  }
+
   findWordsByAltLetterIndex(letter: string, pos: number): Word[] {
     return this.#list.filter((word) => {
-      // log("shall we keep:", word);
       let rtn = false;
-      // word.letters.forEach((char, i) => {
-      // log("char", char, "letter", letter, "i", i, "pos", pos);
-      //   if (char === letter && i === pos) {
-      //     rtn = false;
-      //   }
-
-      //   if (char === letter && i !== pos) {
-      //     rtn = true;
-      //   }
-      // });
-      // log({ rtn });
 
       let idx = 0;
       for (let char of word.letters) {
@@ -90,6 +84,7 @@ export class WordList {
           rtn = true;
           break;
         }
+        idx++;
       }
 
       return rtn;
@@ -152,8 +147,4 @@ export { wordList };
 
 // keepWordsWith(letters: string): void {
 //   this.createNewWordList(this.findWordsWith(letters));
-// }
-
-// removeWordsWith(letters: string) {
-//   this.createNewWordList(this.findWordsWithout(letters));
 // }
