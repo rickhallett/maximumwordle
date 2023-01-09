@@ -32,46 +32,38 @@ export type NumberOfCharsInWord = {
 };
 
 export class Word {
-  #value: string = "";
-  #letters: string[] = [];
+  value: string = "";
+  letters: string[] = [];
 
   constructor(word: string) {
-    this.#value = word;
-    this.#letters = word.split("");
-  }
-
-  get value() {
-    return this.#value;
-  }
-
-  get letters() {
-    return this.#letters;
+    this.value = word;
+    this.letters = word.split("");
   }
 
   [util.inspect.custom]() {
     if (this.isSet()) {
-      return this.#value;
+      return this.value;
     }
 
     return null;
   }
 
   getIndex(index: number): string {
-    return this.#value[index];
+    return this.value[index];
   }
 
   includes(letters: string): boolean {
-    return this.#value.includes(letters);
+    return this.value.includes(letters);
   }
 
   isSet(): boolean {
-    return Boolean(this.#value.length);
+    return Boolean(this.value.length);
   }
 
   private _getGuessWordData(guess: Word): ClueList {
     return guess.letters.map((char, position) => {
       const isGreen: boolean = Boolean(this.getIndex(position) === char);
-      const isGrey: boolean = Boolean(!this.#letters.includes(char));
+      const isGrey: boolean = Boolean(!this.letters.includes(char));
 
       if (isGreen || isGrey) {
         return {
@@ -86,11 +78,11 @@ export class Word {
   }
 
   private _getNumberOfCharsInGameWord(): NumberOfCharsInWord {
-    return this.#letters.reduce((store, char) => {
+    return this.letters.reduce((store, char) => {
       return {
         ...store,
         [char]: {
-          original: this.#letters.filter((l) => l === char).length,
+          original: this.letters.filter((l) => l === char).length,
           found: 0,
         },
       };
@@ -110,7 +102,7 @@ export class Word {
     numberOfCharsInGameWord: NumberOfCharsInWord
   ): ClueList {
     return guessWordData.map((data, i) => {
-      if (!this.#letters.includes(data.char)) {
+      if (!this.letters.includes(data.char)) {
         return data;
       }
 

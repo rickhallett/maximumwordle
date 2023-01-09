@@ -17,12 +17,6 @@ export class WordList {
     return this.#list.slice();
   }
 
-  get listHistory() {
-    const history = this.#listHistory.slice();
-    history.push(this.#list);
-    return history;
-  }
-
   private readFile(
     path: fs.PathOrFileDescriptor,
     encoding: fs.EncodingOption = "utf-8"
@@ -47,16 +41,8 @@ export class WordList {
     return this.#listHistory.length;
   }
 
-  keepWords(words: Word[]): void {
-    this.createNewWordList(this.getWordListWithWords(words));
-  }
-
-  removeWords(words: Word[]): void {
-    this.createNewWordList(this.getWordListWithoutWords(words));
-  }
-
   keepByLetterIndex(letter: string, index: number): void {
-    this.keepWords(this.findWordsWithLetterAtIndex(letter, index));
+    this.createNewWordList(this.findWordsWithLetterAtIndex(letter, index));
   }
 
   removeWordsWith(letters: string) {
@@ -88,19 +74,11 @@ export class WordList {
   }
 
   keepWordsByAltLetterIndex(letter: string, index: number): void {
-    this.keepWords(this.findWordsByAltLetterIndex(letter, index));
+    this.createNewWordList(this.findWordsByAltLetterIndex(letter, index));
   }
 
   findWordsWithLetterAtIndex(letter: string, index: number): Word[] {
     return this.#list.filter((word) => word.getIndex(index) === letter);
-  }
-
-  getWordListWithWords(words: Word[]): Word[] {
-    return this.#list.filter((word) => words.includes(word));
-  }
-
-  getWordListWithoutWords(words: Word[]): Word[] {
-    return this.#list.filter((word) => !words.includes(word));
   }
 }
 

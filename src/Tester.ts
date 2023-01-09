@@ -63,7 +63,7 @@ export class Tester {
   }
 
   isIterationInHundred(): boolean {
-    return this.#iteration % 10 === 0;
+    return this.#iteration % 100 === 0;
   }
 
   setWordList(wordList: Word[]): void {
@@ -92,7 +92,7 @@ export class Tester {
     this.#guessList.push(clueList);
     this.#recordManager.addGuessToRecord(clueList);
     this.#round++;
-    this.prettyPrintGuess(this.#round);
+    if (this.console) this.prettyPrintGuess(this.#round);
 
     return clueList;
   }
@@ -121,11 +121,7 @@ export class Tester {
       [Indicator.HIDDEN_YELLOW]: chalk.gray,
     };
     const clueList = this.getGuessListRound(round);
-    if (this.console)
-      log(
-        round,
-        clueList.map((clue) => format[clue.color](clue.char)).join(" ")
-      );
+    log(round, clueList.map((clue) => format[clue.color](clue.char)).join(" "));
   }
 }
 
