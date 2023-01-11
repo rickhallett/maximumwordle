@@ -1,8 +1,7 @@
-import { Solver } from "./Solver";
-import { tester } from "./Tester";
-import { wordList } from "./WordList";
+import { log } from "console";
+import { WavyHandList } from "./WavyHandList";
 
-console.clear();
+const toWordOrNotToWord = false;
+const wordlist = new WavyHandList(toWordOrNotToWord);
 
-const solver = new Solver(tester, wordList);
-solver.startGame();
+log(wordlist.words);
