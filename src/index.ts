@@ -32,10 +32,12 @@ function executeRound(
 
 console.time("perf");
 
-log(
-  wordlist
-    .map((word) => executeRound(new Tester(word), wordlist))
-    .reduce((sum, record) => sum + record.guesses, 0) / wordlist.length
-);
+const wins = wordlist
+  .map((word) => executeRound(new Tester(word), wordlist))
+  .filter((record) => record.guesses <= 5);
+
+const avg = wins.reduce((sum, record) => sum + record.guesses, 0) / wins.length;
+
+log({ list: wordlist.length, wins: wins.length, avg });
 
 console.timeEnd("perf");
