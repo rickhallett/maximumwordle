@@ -15,23 +15,27 @@ function executeRound(
   list: string[] = wordlist,
   iteration: number = 1
 ): Record {
-  const clues = tester.provideClue(getRandomWord(list));
-  const filteredList = list.filter((word) =>
-    clues.every((clue) => clue.testWord(word))
-  );
-
-  if (filteredList.length === 1) {
+  if (list.length === 1) {
     return {
       solution: tester.gameword,
       guesses: iteration,
     };
   }
 
+  const clues = tester.provideClue(getRandomWord(list));
+  const filteredList = list.filter((word) =>
+    clues.every((clue) => clue.testWord(word))
+  );
+
   return executeRound(tester, filteredList, ++iteration);
 }
+
+console.time("perf");
 
 log(
   wordlist
     .map((word) => executeRound(new Tester(word), wordlist))
     .reduce((sum, record) => sum + record.guesses, 0) / wordlist.length
 );
+
+console.timeEnd("perf");
