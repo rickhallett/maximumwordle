@@ -1,13 +1,12 @@
 import fs from "fs";
-import { Word } from "./Word";
 
-export class WavyHandList {
+export class WordList {
   private file: string;
-  private list: string[] | Word[];
+  public list: string[];
 
-  constructor(toWordOrNotToWord: boolean = true) {
+  constructor() {
     this.file = this.readFile("src/words.txt");
-    this.list = toWordOrNotToWord ? this.createWordList() : this.createList();
+    this.list = this.createList();
   }
 
   private readFile(
@@ -18,18 +17,8 @@ export class WavyHandList {
     return file.toString();
   }
 
-  private createWordList(separator: string = "\n"): Word[] {
-    return this.file
-      .split(separator)
-      .map((word) => new Word(word.toUpperCase()));
-  }
-
   private createList(separator: string = "\n"): string[] {
     return this.file.split(separator).map((word) => word.toUpperCase());
-  }
-
-  get words() {
-    return this.list;
   }
 
   get length() {
